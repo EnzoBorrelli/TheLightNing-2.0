@@ -15,6 +15,7 @@
 
 //led
 #define NEOPIXEL 33
+#define NUM_NEO 2
 
 //sensores Sharp
 #define SHARP_IZQ 27

@@ -6,7 +6,7 @@ codigo de control del RC-car, comunicando el NODEMcu-esp32s con DualSHock4®
 - ByEnder|2023
 
 */
-
+#include <Adafruit_NeoPixel.h>
 #include <Bluepad32.h>
 
 //Librerias propias
@@ -27,6 +27,8 @@ Motor *LadoIZQ = new Motor(PWM_MOTOR_A1, PWM_MOTOR_A2, PIN_MOTOR_A1, PIN_MOTOR_A
 Motor *LadoDER = new Motor(PWM_MOTOR_B1, PWM_MOTOR_B2, PIN_MOTOR_B1, PIN_MOTOR_B2, FREQ, RES);
 
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
+
+Adafruit_NeoPixel ledNeo(NUM_NEO,NEOPIXEL, NEO_GRB + NEO_KHZ800);
 
 // This callback gets called any time a new gamepad is connected.
 // Up to 4 gamepads can be connected at the same time.
@@ -70,8 +72,17 @@ void onDisconnectedGamepad(GamepadPtr gp) {
   }
 }
 
+void LedColorSet(int rgbColor[3]){
+    for (int pixel = 0; pixel < NUM_NEO; pixel++) {         // for each pixel
+    ledNeo.setPixelColor(pixel, ledNeo.Color(rgbColor[0],rgbColor[1], rgbColor[2]));  // it only takes effect if pixels.show() is called
+    ledNeo.show();                                          // update to the WS2812B Led Strip
+
+    delay(500);  // 500ms pause between each pixel
+  }
+}
 // Arduino setup function. Runs in CPU 1
 void setup() {
+  ledNeo.begin();
   if (DEBUG) Serial.begin(115200);
   Serial.printf("Firmware: %s\n", BP32.firmwareVersion());
   const uint8_t *addr = BP32.localBdAddress();
@@ -96,6 +107,7 @@ void loop() {
   // The gamepads pointer (the ones received in the callbacks) gets updated
   // automatically.
   BP32.update();
+  ledNeo.clear();
   // It is safe to always do this before using the gamepad API.
   // This guarantees that the gamepad is valid and connected.
   for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
